@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0a62ff">
   <link rel="manifest" href="manifest.webmanifest">
+
   <!-- iOS A2HS -->
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="BidCalc">
@@ -29,10 +30,10 @@
     small, .muted{ color:var(--muted); }
     input, select, button, textarea{ font: inherit; }
     input[type="text"], input[type="number"], select, textarea{
-      width:100%; padding:12px 12px; border:1px solid var(--border); border-radius:12px; background:#fff;
+      width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:#fff;
     }
     textarea{ min-height:72px; resize:vertical; }
-    button{ padding:12px 16px; border-radius:12px; border:1px solid var(--border); background:#fff; cursor:pointer; min-height:44px; }
+    button{ padding:9px 14px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer; }
     button:hover{ border-color:#bdbdbd; }
     .primary{ background:var(--brand); color:var(--brand-ink); border-color: var(--brand); }
     .danger{ border-color:#c33; color:#c33; }
@@ -58,10 +59,6 @@
     th, td{ border:1px solid var(--border); padding:8px; }
     th{ background:#f3f6ff; text-align:left; }
     tfoot td{ font-weight:700; }
-    /* Toast */
-    #toast{ position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:#222; color:#fff;
-            padding:8px 12px; border-radius:10px; font-size:13px; z-index:9999; opacity:0; transition:opacity .2s; }
-    #toast.show{ opacity:1; }
     /* Print */
     @media print{
       .no-print{ display:none !important; }
@@ -95,8 +92,8 @@
       <div><label>Location <input type="text" id="p-loc" value="Winnipeg, MB"></label></div>
     </div>
     <div class="row">
-      <div><label>Building area (ft²) <input type="number" inputmode="decimal" id="p-area" min="0" step="1" placeholder="e.g., 3500"></label></div>
-      <div><label>Number of floors <input type="number" inputmode="decimal" id="p-floors" min="1" step="1" value="1"></label></div>
+      <div><label>Building area (ft²) <input type="number" id="p-area" min="0" step="1" placeholder="e.g., 3500"></label></div>
+      <div><label>Number of floors <input type="number" id="p-floors" min="1" step="1" value="1"></label></div>
       <div><label>Notes (internal) <input type="text" id="p-notes" placeholder="Optional note for this estimate"></label></div>
     </div>
     <div class="warning">⚠️ This is a budgetary estimate only; not a formal quote. Rates are placeholders — adjust under Settings.</div>
@@ -114,25 +111,25 @@
       <div class="panel" style="flex:2;">
         <h4>Unit rates</h4>
         <div class="row">
-          <div><label>Drywall ($/ft²) <input type="number" inputmode="decimal" id="rate-dw" min="0" step="0.01" value="2.50"></label></div>
-          <div><label>Framing ($/LF) <input type="number" inputmode="decimal" id="rate-fr" min="0" step="0.01" value="10.00"></label></div>
-          <div><label>Insulation ($/ft²) <input type="number" inputmode="decimal" id="rate-ins" min="0" step="0.01" value="1.20"></label></div>
-          <div><label>Taping ($/ft²) <input type="number" inputmode="decimal" id="rate-tape" min="0" step="0.01" value="0.90"></label></div>
-          <div><label>ACT ceilings ($/ft²) <input type="number" inputmode="decimal" id="rate-act" min="0" step="0.01" value="4.50"></label></div>
+          <div><label>Drywall ($/ft²) <input type="number" id="rate-dw" min="0" step="0.01" value="2.50"></label></div>
+          <div><label>Framing ($/LF) <input type="number" id="rate-fr" min="0" step="0.01" value="10.00"></label></div>
+          <div><label>Insulation ($/ft²) <input type="number" id="rate-ins" min="0" step="0.01" value="1.20"></label></div>
+          <div><label>Taping ($/ft²) <input type="number" id="rate-tape" min="0" step="0.01" value="0.90"></label></div>
+          <div><label>ACT ceilings ($/ft²) <input type="number" id="rate-act" min="0" step="0.01" value="4.50"></label></div>
         </div>
         <h5 style="margin-top:10px;">Framing openers adders (per opening)</h5>
         <div class="row">
-          <div><label>Window adder ($/ea) <input type="number" inputmode="decimal" id="adder-win" min="0" step="0.01" value="25.00"></label></div>
-          <div><label>Door adder ($/ea) <input type="number" inputmode="decimal" id="adder-door" min="0" step="0.01" value="30.00"></label></div>
-          <div><label>Closet adder ($/ea) <input type="number" inputmode="decimal" id="adder-closet" min="0" step="0.01" value="20.00"></label></div>
+          <div><label>Window adder ($/ea) <input type="number" id="adder-win" min="0" step="0.01" value="25.00"></label></div>
+          <div><label>Door adder ($/ea) <input type="number" id="adder-door" min="0" step="0.01" value="30.00"></label></div>
+          <div><label>Closet adder ($/ea) <input type="number" id="adder-closet" min="0" step="0.01" value="20.00"></label></div>
         </div>
       </div>
       <div class="panel" style="flex:1;">
         <h4>Regional & tax</h4>
         <div class="row">
-          <div><label>Regional multiplier <input type="number" inputmode="decimal" id="multiplier" min="0.5" step="0.01" value="1.00"></label></div>
-          <div><label>GST % <input type="number" inputmode="decimal" id="gst" min="0" step="0.1" value="0"></label></div>
-          <div><label>PST % <input type="number" inputmode="decimal" id="pst" min="0" step="0.1" value="0"></label></div>
+          <div><label>Regional multiplier <input type="number" id="multiplier" min="0.5" step="0.01" value="1.00"></label></div>
+          <div><label>GST % <input type="number" id="gst" min="0" step="0.1" value="0"></label></div>
+          <div><label>PST % <input type="number" id="pst" min="0" step="0.1" value="0"></label></div>
         </div>
         <small class="muted">Taxes are optional; set to 0% if not applicable in your quote.</small>
       </div>
@@ -162,6 +159,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Dynamic job cards go here -->
     <div id="jobs" style="display:flex; flex-direction:column; gap:12px; margin-top:10px;"></div>
   </section>
 
@@ -175,8 +174,15 @@
           <button id="btn-export-csv">Export CSV</button>
           <button id="btn-print">Export PDF / Print</button>
           <button id="btn-share">Share link</button>
+          <!-- Optional: visible on Android/Chrome when installable -->
+          <button id="btn-install" class="primary no-print" style="display:none;">Install app</button>
         </div>
       </div>
+    </div>
+
+    <!-- iOS install hint (shown only in Safari via JS) -->
+    <div id="ios-a2hs" class="panel no-print" style="display:none; margin-top:10px;">
+      On iPhone: open in <b>Safari</b> → Share → <b>Add to Home Screen</b> to install.
     </div>
 
     <div id="kpis" class="kpi">
@@ -226,12 +232,12 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="dw-name" placeholder="e.g., Level 2 — corridors"></label></div>
-        <div><label>Total drywall coverage (ft²) <input type="number" inputmode="decimal" class="dw-area" min="0" step="1"></label></div>
+        <div><label>Total drywall coverage (ft²) <input type="number" class="dw-area" min="0" step="1"></label></div>
       </div>
       <label>Ceiling height (optional)</label>
       <div class="row">
-        <div><input type="number" inputmode="decimal" class="dw-ft inch-ft" placeholder="ft" min="0"></div>
-        <div><input type="number" inputmode="decimal" class="dw-in inch-in" placeholder='in (max 11.875")' min="0" step="0.125"></div>
+        <div><input type="number" class="dw-ft inch-ft" placeholder="ft" min="0"></div>
+        <div><input type="number" class="dw-in inch-in" placeholder='in (max 11.875")' min="0" step="0.125"></div>
       </div>
       <div class="warning">Max inches is 11&nbsp;7/8" (11.875"). If 12"+ entered, it converts to extra feet.</div>
       <label>Notes <input type="text" class="dw-notes" placeholder="Optional note"></label>
@@ -249,12 +255,12 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="fr-name" placeholder="e.g., West wall"></label></div>
-        <div><label>Linear feet (approx) <input type="number" inputmode="decimal" class="fr-lf" min="0" step="0.1"></label></div>
+        <div><label>Linear feet (approx) <input type="number" class="fr-lf" min="0" step="0.1"></label></div>
       </div>
       <div class="row">
-        <div><label>Windows <input type="number" inputmode="decimal" class="fr-win" min="0" step="1" value="0"></label></div>
-        <div><label>Doors <input type="number" inputmode="decimal" class="fr-door" min="0" step="1" value="0"></label></div>
-        <div><label>Closets <input type="number" inputmode="decimal" class="fr-closet" min="0" step="1" value="0"></label></div>
+        <div><label>Windows <input type="number" class="fr-win" min="0" step="1" value="0"></label></div>
+        <div><label>Doors <input type="number" class="fr-door" min="0" step="1" value="0"></label></div>
+        <div><label>Closets <input type="number" class="fr-closet" min="0" step="1" value="0"></label></div>
       </div>
       <label>Notes <input type="text" class="fr-notes" placeholder="Optional note"></label>
     </div>
@@ -271,7 +277,7 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="ins-name" placeholder="e.g., Exterior walls L2"></label></div>
-        <div><label>Estimated area (ft²) <input type="number" inputmode="decimal" class="ins-area" min="0" step="1"></label></div>
+        <div><label>Estimated area (ft²) <input type="number" class="ins-area" min="0" step="1"></label></div>
       </div>
       <label>Notes <input type="text" class="ins-notes" placeholder="Optional note"></label>
     </div>
@@ -288,10 +294,10 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="tp-name" placeholder="e.g., Level 1 — offices"></label></div>
-        <div><label>Drywall area taped (ft²) <input type="number" inputmode="decimal" class="tp-area" min="0" step="1"></label></div>
+        <div><label>Drywall area taped (ft²) <input type="number" class="tp-area" min="0" step="1"></label></div>
       </div>
       <div class="row">
-        <div><label>Number of corners <input type="number" inputmode="decimal" class="tp-corners" min="0" step="1" value="0"></label></div>
+        <div><label>Number of corners <input type="number" class="tp-corners" min="0" step="1" value="0"></label></div>
       </div>
       <label>Notes <input type="text" class="tp-notes" placeholder="Optional note"></label>
     </div>
@@ -308,7 +314,7 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="act-name" placeholder="e.g., Open office"></label></div>
-        <div><label>Drop ceiling area (ft²) <input type="number" inputmode="decimal" class="act-area" min="0" step="1"></label></div>
+        <div><label>Drop ceiling area (ft²) <input type="number" class="act-area" min="0" step="1"></label></div>
       </div>
       <label>Notes <input type="text" class="act-notes" placeholder="Optional note"></label>
     </div>
@@ -324,8 +330,8 @@
         </div>
       </header>
       <div class="row">
-        <div><label>Delivery estimate ($) <input type="number" inputmode="decimal" class="ex-delivery" min="0" step="0.01"></label></div>
-        <div><label>Other fees ($) <input type="number" inputmode="decimal" class="ex-other" min="0" step="0.01"></label></div>
+        <div><label>Delivery estimate ($) <input type="number" class="ex-delivery" min="0" step="0.01"></label></div>
+        <div><label>Other fees ($) <input type="number" class="ex-other" min="0" step="0.01"></label></div>
       </div>
       <label>Notes <input type="text" class="ex-notes" placeholder="Optional note"></label>
     </div>
@@ -342,7 +348,7 @@
       </header>
       <div class="row">
         <div><label>Item name <input type="text" class="cu-name" placeholder="e.g., Demolition allowance"></label></div>
-        <div><label>Amount ($) <input type="number" inputmode="decimal" class="cu-amount" min="0" step="0.01"></label></div>
+        <div><label>Amount ($) <input type="number" class="cu-amount" min="0" step="0.01"></label></div>
       </div>
       <label>Notes <input type="text" class="cu-notes" placeholder="Optional note"></label>
     </div>
@@ -396,6 +402,7 @@
       $('.btn-remove', node).addEventListener('click', ()=> node.remove());
       $('.btn-dup', node).addEventListener('click', ()=> {
         const copy = addJob(kind);
+        // Copy common fields
         $$('input, textarea', node).forEach((el,i)=>{
           const target = $$('input, textarea', copy)[i];
           if (!target) return;
@@ -403,8 +410,10 @@
         });
       });
       // Inches normalization for drywall height
-      if (kind==='drywall'){ bindInchesPair($('.dw-ft', node), $('.dw-in', node)); }
-      // Apply incoming data (load/share)
+      if (kind==='drywall'){
+        bindInchesPair($('.dw-ft', node), $('.dw-in', node));
+      }
+      // Apply incoming data (for load/share)
       if (data){ hydrateJob(node, kind, data); }
       jobsBox.appendChild(node);
       return node;
@@ -434,7 +443,8 @@
         let inc = n(inEl.value,0);
         if (inc >= 12){
           const add = Math.floor(inc/12);
-          ft += add; inc = inc - add*12;
+          ft += add;
+          inc = inc - add*12;
           toast('Inches ≥ 12" converted to additional feet.');
         }
         if (inc > 11.875){
@@ -476,14 +486,14 @@
     }
 
     function calculate(){
-      const S = readSettings();
+      const settings = readSettings();
       const items = [];
       $$('.job-card', jobsBox).forEach(card=>{
         const type = card.dataset.type;
-        const it = calcItem(type, card, S);
+        const it = calcItem(type, card, settings);
         if (it) items.push(...(Array.isArray(it)? it : [it]));
       });
-      renderLines(items, S);
+      renderLines(items, settings);
       console.debug('[analytics] rough_calculate', {items: items.length});
     }
 
@@ -596,7 +606,7 @@
     function esc(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]); }
 
     // ====== Export CSV ======
-    $('#btn-export-csv').addEventListener('click', async ()=>{
+    $('#btn-export-csv').addEventListener('click', ()=>{
       calculate();
       const rows = [];
       rows.push(['Project', $('#p-name').value, '', '', '', '']);
@@ -620,18 +630,10 @@
       }).join(',')).join('\n');
 
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const pn = ($('#p-name').value || 'estimate').replace(/[^\w\-]+/g,'_') + '_rough_estimate.csv';
-
-      // Try web share with file (mobile-friendly)
-      const file = new File([blob], pn, {type:'text/csv'});
-      if (navigator.share && navigator.canShare?.({files:[file]})) {
-        try { await navigator.share({files:[file], title:'BidCalc Rough Estimate', text:'Rough estimate CSV'}); toast('CSV shared.'); return; }
-        catch(e){ /* fallback to download */ }
-      }
-
       const a = document.createElement('a');
+      const pn = ($('#p-name').value || 'estimate').replace(/[^\w\-]+/g,'_');
       a.href = URL.createObjectURL(blob);
-      a.download = pn;
+      a.download = `${pn}_rough_estimate.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -652,11 +654,11 @@
       const json = JSON.stringify(data);
       const b64 = btoa(unescape(encodeURIComponent(json))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
       const url = `${location.origin}${location.pathname}?data=${b64}`;
-      if (navigator.share) {
-        navigator.share({title:'BidCalc Rough', text:'Rough estimate link', url}).catch(()=>{});
-      } else {
-        navigator.clipboard?.writeText(url).then(()=> toast('Share link copied to clipboard.'), ()=> prompt('Copy this link:', url));
-      }
+      navigator.clipboard?.writeText(url).then(()=>{
+        toast('Share link copied to clipboard.');
+      }, ()=>{
+        prompt('Copy this link:', url);
+      });
       console.debug('[analytics] share_link');
     });
 
@@ -766,7 +768,9 @@
         $('#pst').value = settings.pst ?? 0;
       }
       jobsBox.innerHTML = '';
-      (jobs||[]).forEach(j=> addJob(j.t, j));
+      (jobs||[]).forEach(j=>{
+        addJob(j.t, j);
+      });
       calculate();
     }
 
@@ -777,33 +781,76 @@
       if (!b64) return;
       try{
         const json = decodeURIComponent(escape(atob(b64.replace(/-/g,'+').replace(/_/g,'/'))));
-        loadFromData(JSON.parse(json));
+        const data = JSON.parse(json);
+        loadFromData(data);
         toast('Loaded from shared link.');
       }catch(e){ console.warn('Failed to parse shared data', e); }
     })();
 
-    // ====== Toast ======
+    // ====== Small toast ======
     let toastTimer;
     function toast(msg){
       const t = $('#toast');
       t.textContent = msg;
-      t.classList.add('show');
+      t.style.position='fixed'; t.style.left='50%'; t.style.bottom='20px';
+      t.style.transform='translateX(-50%)'; t.style.background='#222'; t.style.color='#fff';
+      t.style.padding='8px 12px'; t.style.borderRadius='8px'; t.style.fontSize='13px'; t.style.zIndex='9999';
+      t.classList.remove('hidden');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+      toastTimer = setTimeout(()=> t.classList.add('hidden'), 2200);
     }
 
-    // Expose for debugging
+    // Expose for debug
     window.__Rough = { addJob, calculate, serializeAll };
   })();
   </script>
 
-  <!-- PWA: register Service Worker -->
+  <!-- Install button logic (Android/Chrome) + iOS hint -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
-      });
+  // Show Install button when install prompt is available
+  let deferredPrompt;
+  const btnInstall = document.getElementById('btn-install');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (btnInstall) btnInstall.style.display = 'inline-block';
+  });
+
+  btnInstall?.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    btnInstall.disabled = true;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    btnInstall.style.display = 'none';
+    btnInstall.disabled = false;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    if (btnInstall) btnInstall.style.display = 'none';
+  });
+
+  // Show iOS A2HS hint only in Safari when not standalone
+  (function(){
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    const isSafari = isIOS && /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
+    if (isIOS && isSafari && !isStandalone) {
+      const tip = document.getElementById('ios-a2hs');
+      if (tip) tip.style.display = 'block';
     }
+  })();
+  </script>
+
+  <!-- Register Service Worker -->
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(console.error);
+    });
+  }
   </script>
 </body>
 </html>
