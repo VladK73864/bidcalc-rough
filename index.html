@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BidCalc — Rough Estimate (Free)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a62ff">
+  <link rel="manifest" href="manifest.webmanifest">
+  <!-- iOS A2HS -->
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="BidCalc">
+
+  <style>
+    :root{
+      --card:#f9f9f9; --panel:#fcfcfc; --border:#dadada; --ink:#111; --muted:#666;
+      --brand:#0a62ff; --brand-ink:#fff; --warn:#8a2d2d; --ok:#0f7b0f;
+    }
+    *{ box-sizing:border-box; }
+    body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--ink);
+          margin:0; padding:24px; max-width:1024px; }
+    h1{ margin: 0 0 8px; }
+    h2{ margin: 24px 0 12px; }
+    h3{ margin: 18px 0 10px; }
+    h4,h5{ margin: 10px 0 6px; }
+    p{ color:var(--muted); }
+    label{ display:block; margin-top:8px; font-weight:500; }
+    small, .muted{ color:var(--muted); }
+    input, select, button, textarea{ font: inherit; }
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%; padding:12px 12px; border:1px solid var(--border); border-radius:12px; background:#fff;
+    }
+    textarea{ min-height:72px; resize:vertical; }
+    button{ padding:12px 16px; border-radius:12px; border:1px solid var(--border); background:#fff; cursor:pointer; min-height:44px; }
+    button:hover{ border-color:#bdbdbd; }
+    .primary{ background:var(--brand); color:var(--brand-ink); border-color: var(--brand); }
+    .danger{ border-color:#c33; color:#c33; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; }
+    .row > div{ flex:1 1 220px; min-width:220px; }
+    .section{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:16px; }
+    .panel{ background:var(--panel); border:1px dashed var(--border); border-radius:12px; padding:12px; }
+    .hidden{ display:none !important; }
+    .tag{ display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:#eef3ff; border:1px solid #cbd8ff; color:#2042a5; }
+    .right{ text-align:right; }
+    .warning{ color:var(--warn); font-style:italic; margin-top:6px; }
+    .ok{ color:var(--ok); }
+    .grid-2{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
+    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; }
+    .job-card header{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .job-card header h4{ margin:0; }
+    .pill{ font-size:12px; padding:2px 6px; border-radius:999px; background:#eee; }
+    .footer-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .kpi{ display:flex; gap:16px; flex-wrap:wrap; }
+    .kpi .box{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px 12px; min-width:180px; }
+    .kpi .box b{ font-size:18px; }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ border:1px solid var(--border); padding:8px; }
+    th{ background:#f3f6ff; text-align:left; }
+    tfoot td{ font-weight:700; }
+    /* Toast */
+    #toast{ position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:#222; color:#fff;
+            padding:8px 12px; border-radius:10px; font-size:13px; z-index:9999; opacity:0; transition:opacity .2s; }
+    #toast.show{ opacity:1; }
+    /* Print */
+    @media print{
+      .no-print{ display:none !important; }
+      body{ padding:0 12mm; }
+      .section{ border:none; background:#fff; padding:0; margin: 8px 0; }
+      .panel{ border:none; background:#fff; }
+      button{ display:none !important; }
+      a{ color:inherit; text-decoration:none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="grid-2">
+    <div>
+      <h1>BidCalc — Rough Estimate <span class="tag">Free</span></h1>
+      <p class="muted">Budgetary estimate for quick planning. For detailed materials & labor, Precise (Pro) is coming later.</p>
+    </div>
+    <div class="right no-print">
+      <button id="btn-save" title="Save to this browser">Save draft</button>
+      <button id="btn-load" title="Load last saved">Load draft</button>
+      <button id="btn-new" class="danger" title="Clear everything">New</button>
+    </div>
+  </header>
+
+  <!-- Project info -->
+  <section class="section" id="project">
+    <h2>Project</h2>
+    <div class="row">
+      <div><label>Project name <input type="text" id="p-name" placeholder="e.g., Tenant Fit-out — 2nd Floor"></label></div>
+      <div><label>General contractor <input type="text" id="p-gc" placeholder="e.g., ACME GC Ltd."></label></div>
+      <div><label>Location <input type="text" id="p-loc" value="Winnipeg, MB"></label></div>
+    </div>
+    <div class="row">
+      <div><label>Building area (ft²) <input type="number" inputmode="decimal" id="p-area" min="0" step="1" placeholder="e.g., 3500"></label></div>
+      <div><label>Number of floors <input type="number" inputmode="decimal" id="p-floors" min="1" step="1" value="1"></label></div>
+      <div><label>Notes (internal) <input type="text" id="p-notes" placeholder="Optional note for this estimate"></label></div>
+    </div>
+    <div class="warning">⚠️ This is a budgetary estimate only; not a formal quote. Rates are placeholders — adjust under Settings.</div>
+  </section>
+
+  <!-- Rates & settings -->
+  <section class="section" id="settings">
+    <div class="grid-2">
+      <h2>Rates & Settings</h2>
+      <div class="right no-print">
+        <button id="btn-reset-rates">Reset defaults</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel" style="flex:2;">
+        <h4>Unit rates</h4>
+        <div class="row">
+          <div><label>Drywall ($/ft²) <input type="number" inputmode="decimal" id="rate-dw" min="0" step="0.01" value="2.50"></label></div>
+          <div><label>Framing ($/LF) <input type="number" inputmode="decimal" id="rate-fr" min="0" step="0.01" value="10.00"></label></div>
+          <div><label>Insulation ($/ft²) <input type="number" inputmode="decimal" id="rate-ins" min="0" step="0.01" value="1.20"></label></div>
+          <div><label>Taping ($/ft²) <input type="number" inputmode="decimal" id="rate-tape" min="0" step="0.01" value="0.90"></label></div>
+          <div><label>ACT ceilings ($/ft²) <input type="number" inputmode="decimal" id="rate-act" min="0" step="0.01" value="4.50"></label></div>
+        </div>
+        <h5 style="margin-top:10px;">Framing openers adders (per opening)</h5>
+        <div class="row">
+          <div><label>Window adder ($/ea) <input type="number" inputmode="decimal" id="adder-win" min="0" step="0.01" value="25.00"></label></div>
+          <div><label>Door adder ($/ea) <input type="number" inputmode="decimal" id="adder-door" min="0" step="0.01" value="30.00"></label></div>
+          <div><label>Closet adder ($/ea) <input type="number" inputmode="decimal" id="adder-closet" min="0" step="0.01" value="20.00"></label></div>
+        </div>
+      </div>
+      <div class="panel" style="flex:1;">
+        <h4>Regional & tax</h4>
+        <div class="row">
+          <div><label>Regional multiplier <input type="number" inputmode="decimal" id="multiplier" min="0.5" step="0.01" value="1.00"></label></div>
+          <div><label>GST % <input type="number" inputmode="decimal" id="gst" min="0" step="0.1" value="0"></label></div>
+          <div><label>PST % <input type="number" inputmode="decimal" id="pst" min="0" step="0.1" value="0"></label></div>
+        </div>
+        <small class="muted">Taxes are optional; set to 0% if not applicable in your quote.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jobs builder -->
+  <section class="section" id="rough">
+    <div class="grid-2">
+      <h2>Jobs</h2>
+      <div class="right no-print">
+        <div class="toolbar">
+          <label style="margin:0;">
+            <select id="job-select">
+              <option value="" selected disabled>Select a job type…</option>
+              <option value="drywall">Drywall</option>
+              <option value="framing">Framing</option>
+              <option value="insulation">Insulation</option>
+              <option value="taping">Taping</option>
+              <option value="act">ACT Ceilings</option>
+              <option value="extras">Extras (delivery, fasteners, etc.)</option>
+              <option value="custom">Custom item</option>
+            </select>
+          </label>
+          <button id="btn-add" class="primary">Add job</button>
+          <button id="btn-add-another">Add another job</button>
+        </div>
+      </div>
+    </div>
+    <div id="jobs" style="display:flex; flex-direction:column; gap:12px; margin-top:10px;"></div>
+  </section>
+
+  <!-- Summary -->
+  <section class="section" id="summary">
+    <div class="grid-2">
+      <h2>Summary</h2>
+      <div class="right no-print">
+        <div class="toolbar">
+          <button id="btn-calc" class="primary">Calculate</button>
+          <button id="btn-export-csv">Export CSV</button>
+          <button id="btn-print">Export PDF / Print</button>
+          <button id="btn-share">Share link</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="kpis" class="kpi">
+      <div class="box"><div class="muted">Subtotal</div><b id="kpi-sub">$0.00</b></div>
+      <div class="box"><div class="muted">GST</div><b id="kpi-gst">$0.00</b></div>
+      <div class="box"><div class="muted">PST</div><b id="kpi-pst">$0.00</b></div>
+      <div class="box"><div class="muted">Total</div><b id="kpi-total">$0.00</b></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px;">
+      <h4>Line items</h4>
+      <div class="warning">Rates are editable in Settings. Quantities from job cards.</div>
+      <div style="overflow:auto;">
+        <table id="lines">
+          <thead>
+            <tr>
+              <th style="width:20%;">Job</th>
+              <th style="width:30%;">Description</th>
+              <th style="width:10%;">Qty</th>
+              <th style="width:10%;">Unit</th>
+              <th style="width:15%;">Unit price</th>
+              <th style="width:15%;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="lines-body"><tr><td colspan="6" class="muted">No items yet.</td></tr></tbody>
+          <tfoot>
+            <tr><td colspan="5" class="right">Subtotal</td><td id="ft-sub">$0.00</td></tr>
+            <tr><td colspan="5" class="right">GST</td><td id="ft-gst">$0.00</td></tr>
+            <tr><td colspan="5" class="right">PST</td><td id="ft-pst">$0.00</td></tr>
+            <tr><td colspan="5" class="right">Total</td><td id="ft-total">$0.00</td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="warning" style="margin-top:10px;">⚠️ Budgetary estimate only — subject to site conditions, drawings, and scope clarifications.</div>
+    </div>
+  </section>
+
+  <!-- Templates -->
+  <template id="tpl-drywall">
+    <div class="section job-card" data-type="drywall">
+      <header>
+        <h4>Drywall (Rough) <span class="pill">ft²-based</span></h4>
+        <div class="toolbar no-print">
+          <button type="button" class="btn-dup">Duplicate</button>
+          <button type="button" class="btn-remove">Remove</button>
+        </div>
+      </header>
+      <div class="row">
+        <div><label>Area name <input type="text" class="dw-name" placeholder="e.g., Level 2 — corridors"></label></div>
+        <div><label>Total drywall coverage (ft²) <input type="number" inputmode="decimal" class="dw-area" min="0" step="1"></label></div>
+      </div>
+      <label>Ceiling height (optional)</label>
+      <div class="row">
+        <div><input type="number" inputmode="decimal" class="dw-ft inch-ft" placeholder="ft" min="0"></div>
+        <div><input type="number" inputmode="decimal" class="dw-in inch-in" placeholder='in (max 11.875")' min="0" step="0.125"></div>
+      </div>
+      <div class="warning">Max inches is 11&nbsp;7/8" (11.875"). If 12"+ entered, it converts to extra feet.</div>
+      <label>Notes <input type="text" class="dw-notes" placeholder="Optional note"></label>
+    </div>
+  </template>
+
+  <template id="tpl-framing">
+    <div class="section job-card" data-type="framing">
+      <header>
+        <h4>Framing (Rough) <span class="pill">LF + openings</span></h4>
+        <div class="toolbar no-print">
+          <button type="button" class="btn-dup">Duplicate</button>
+          <button type="button" class="btn-remove">Remove</button>
+        </div>
+      </header>
+      <div class="row">
+        <div><label>Area name <input type="text" class="fr-name" placeholder="e.g., West wall"></label></div>
+        <div><label>Linear feet (approx) <input type="number" inputmode="decimal" class="fr-lf" min="0" step="0.1"></label></div>
+      </div>
+      <div class="row">
+        <div><label>Windows <input type="number" inputmode="decimal" class="fr-win" min="0" step="1" value="0"></label></div>
+        <div><label>Doors <input type="number" inputmode="decimal" class="fr-door" min="0" step="1" value="0"></label></div>
+        <div><label>Closets <input type="number" inputmode="decimal" class="fr-closet" min="0" step="1" value="0"></label></div>
+      </div>
+      <label>Notes <input type="text" class="fr-notes" placeholder="Optional note"></label>
+    </div>
+  </template>
+
+  <template id="tpl-insulation">
+    <div class="section job-card" data-type="insulation">
+      <header>
+        <h4>Insulation (Rough) <span class="pill">ft²-based</span></h4>
+        <div class="toolbar no-print">
+          <button type="button" class="btn-dup">Duplicate</button>
+          <button type="button" class="btn-remove">Remove</button>
+        </div>
+      </header>
+      <div class="row">
+        <div><label>Area name <input type="text" class="ins-name" placeholder="e.g., Exterior walls L2"></label></div>
+        <div><label>Estimated area (ft²) <input type="number" inputmode="decimal" class="ins-area" min="0" step="1"></label></div>
+      </div>
+      <label>Notes <input type="text" class="ins-notes" placeholder="Optional note"></label>
+    </div>
+  </template>
+
+  <template id="tpl-taping">
+    <div class="section job-card" data-type="taping">
+      <header>
+        <h4>Taping (Rough) <span class="pill">ft²-based</span></h4>
+        <div class="toolbar no-print">
+          <button type="button" class="btn-dup">Duplicate</button>
+          <button type="button" class="btn-remove">Remove</button>
+        </div>
+      </header>
+      <div class="row">
+        <div><label>Area name <input type="text" class="tp-name" placeholder="e.g., Level 1 — offices"></label></div>
+        <div><label>Drywall area taped (ft²) <input type="number" inputmode="decimal" class="tp-area" min="0" step="1"></label></div>
+      </div>
+      <div class="row">
+        <div><label>Number of corners <input type="number" inputmode="decimal" class="tp-corners" min="0" step="1" value="0"></label></div>
+      </div>
+      <label>Notes <input type="text" class="tp-notes" placeholder="Optional note"></label>
+    </div>
+  </template>
+
+  <template id="tpl-act">
+    <div class="section job-card" data-type="act">
+      <header>
+        <h4>ACT Ceilings (Rough) <span class="pill">ft²-based</span></h4>
+        <div class="toolbar no-print">
+          <button type="button" class="btn-dup">Duplicate</button>
+          <button type="button" class="btn-remove">Remove</button>
+        </div>
+      </header>
+      <div class="row">
+        <div><label>Area name <input type="text" class="act-name" placeholder="e.g., Open office"></label></div>
+        <div><label>Drop ceiling area (ft²) <input type="number" inputmode="decimal" class="act-area" min="0" step="1"></label></div>
+      </div>
+      <label>Notes <input type="text" class="act-notes" placeholder="Optional note"></label>
+    </div>
+  </template>
+
+  <template id="tpl-extras">
+    <div class="section job-card" data-type="extras">
+      <header>
+        <h4>Extras (Rough)</h4>
+        <div class="toolbar no-print">
+          <button type="button" class="btn-dup">Duplicate</button>
+          <button type="button" class="btn-remove">Remove</button>
+        </div>
+      </header>
+      <div class="row">
+        <div><label>Delivery estimate ($) <input type="number" inputmode="decimal" class="ex-delivery" min="0" step="0.01"></label></div>
+        <div><label>Other fees ($) <input type="number" inputmode="decimal" class="ex-other" min="0" step="0.01"></label></div>
+      </div>
+      <label>Notes <input type="text" class="ex-notes" placeholder="Optional note"></label>
+    </div>
+  </template>
+
+  <template id="tpl-custom">
+    <div class="section job-card" data-type="custom">
+      <header>
+        <h4>Custom item</h4>
+        <div class="toolbar no-print">
+          <button type="button" class="btn-dup">Duplicate</button>
+          <button type="button" class="btn-remove">Remove</button>
+        </div>
+      </header>
+      <div class="row">
+        <div><label>Item name <input type="text" class="cu-name" placeholder="e.g., Demolition allowance"></label></div>
+        <div><label>Amount ($) <input type="number" inputmode="decimal" class="cu-amount" min="0" step="0.01"></label></div>
+      </div>
+      <label>Notes <input type="text" class="cu-notes" placeholder="Optional note"></label>
+    </div>
+  </template>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden" aria-live="polite"></div>
+
+  <script>
+  (function(){
+    const $  = (sel, root=document)=> root.querySelector(sel);
+    const $$ = (sel, root=document)=> Array.from(root.querySelectorAll(sel));
+    const n  = (v,d=0)=>{ const x=parseFloat(v); return Number.isFinite(x)?x:d; };
+    const fmt = v => '$' + (Number(v||0).toFixed(2));
+
+    const jobsBox = $('#jobs');
+    const jobSelect = $('#job-select');
+
+    // ====== Add job cards ======
+    const templates = {
+      drywall:  $('#tpl-drywall'),
+      framing:  $('#tpl-framing'),
+      insulation: $('#tpl-insulation'),
+      taping:   $('#tpl-taping'),
+      act:      $('#tpl-act'),
+      extras:   $('#tpl-extras'),
+      custom:   $('#tpl-custom'),
+    };
+    const counters = {drywall:0,framing:0,insulation:0,taping:0,act:0,extras:0,custom:0};
+
+    $('#btn-add').addEventListener('click', ()=> addSelected());
+    $('#btn-add-another').addEventListener('click', ()=> addSelected());
+
+    function addSelected(){
+      const kind = jobSelect.value;
+      if (!kind){ alert('Please select a job type.'); return; }
+      addJob(kind);
+    }
+
+    function addJob(kind, data){
+      const tpl = templates[kind];
+      if (!tpl) return;
+      const node = tpl.content.firstElementChild.cloneNode(true);
+      counters[kind] += 1;
+      // Label/number
+      const title = node.querySelector('header h4');
+      if (title){
+        title.textContent = title.textContent.replace(/\s+#\d+$/,'') + ' #' + counters[kind];
+      }
+      // Bind buttons
+      $('.btn-remove', node).addEventListener('click', ()=> node.remove());
+      $('.btn-dup', node).addEventListener('click', ()=> {
+        const copy = addJob(kind);
+        $$('input, textarea', node).forEach((el,i)=>{
+          const target = $$('input, textarea', copy)[i];
+          if (!target) return;
+          target.value = el.value;
+        });
+      });
+      // Inches normalization for drywall height
+      if (kind==='drywall'){ bindInchesPair($('.dw-ft', node), $('.dw-in', node)); }
+      // Apply incoming data (load/share)
+      if (data){ hydrateJob(node, kind, data); }
+      jobsBox.appendChild(node);
+      return node;
+    }
+
+    function hydrateJob(node, kind, data){
+      const map = {
+        drywall: [['.dw-name','name'],['.dw-area','area'],['.dw-ft','ft'],['.dw-in','inch'],['.dw-notes','notes']],
+        framing: [['.fr-name','name'],['.fr-lf','lf'],['.fr-win','win'],['.fr-door','door'],['.fr-closet','closet'],['.fr-notes','notes']],
+        insulation: [['.ins-name','name'],['.ins-area','area'],['.ins-notes','notes']],
+        taping: [['.tp-name','name'],['.tp-area','area'],['.tp-corners','corners'],['.tp-notes','notes']],
+        act: [['.act-name','name'],['.act-area','area'],['.act-notes','notes']],
+        extras: [['.ex-delivery','delivery'],['.ex-other','other'],['.ex-notes','notes']],
+        custom: [['.cu-name','name'],['.cu-amount','amount'],['.cu-notes','notes']],
+      }[kind] || [];
+      map.forEach(([sel,key])=>{
+        const el = $(sel, node);
+        if (el && data[key]!==undefined) el.value = data[key];
+      });
+    }
+
+    // ====== Inches normalization (ft + in, cap 11.875) ======
+    function bindInchesPair(ftEl, inEl){
+      if (!ftEl || !inEl) return;
+      const normalize = ()=>{
+        let ft = n(ftEl.value,0);
+        let inc = n(inEl.value,0);
+        if (inc >= 12){
+          const add = Math.floor(inc/12);
+          ft += add; inc = inc - add*12;
+          toast('Inches ≥ 12" converted to additional feet.');
+        }
+        if (inc > 11.875){
+          ft += 1; inc = 0;
+          toast('Max inches is 11 7/8". Rounded up by 1 foot.');
+        }
+        ftEl.value = ft;
+        inEl.value = (Math.round(inc*1000)/1000);
+      };
+      inEl.addEventListener('blur', normalize);
+      inEl.addEventListener('change', normalize);
+      inEl.addEventListener('input', ()=>{
+        const v = n(inEl.value,0);
+        inEl.style.outline = v>=12 ? '2px solid #c0392b' : '';
+      });
+    }
+
+    // ====== Calculate ======
+    $('#btn-calc').addEventListener('click', calculate);
+
+    function readSettings(){
+      return {
+        rate: {
+          dw:  n($('#rate-dw').value, 2.5),
+          fr:  n($('#rate-fr').value, 10),
+          ins: n($('#rate-ins').value, 1.2),
+          tp:  n($('#rate-tape').value, 0.9),
+          act: n($('#rate-act').value, 4.5),
+        },
+        add: {
+          win: n($('#adder-win').value, 25),
+          door:n($('#adder-door').value, 30),
+          closet:n($('#adder-closet').value, 20),
+        },
+        mult: n($('#multiplier').value, 1),
+        gst:  n($('#gst').value, 0),
+        pst:  n($('#pst').value, 0),
+      };
+    }
+
+    function calculate(){
+      const S = readSettings();
+      const items = [];
+      $$('.job-card', jobsBox).forEach(card=>{
+        const type = card.dataset.type;
+        const it = calcItem(type, card, S);
+        if (it) items.push(...(Array.isArray(it)? it : [it]));
+      });
+      renderLines(items, S);
+      console.debug('[analytics] rough_calculate', {items: items.length});
+    }
+
+    function calcItem(type, card, S){
+      switch(type){
+        case 'drywall': {
+          const name = $('.dw-name', card).value || 'Drywall';
+          const area = n($('.dw-area', card).value, 0);
+          if (area<=0) return null;
+          const unit = 'ft²';
+          const unitPrice = S.rate.dw * S.mult;
+          const amount = area * unitPrice;
+          return {job:'Drywall', desc:name, qty:area, unit, unitPrice, amount};
+        }
+        case 'framing': {
+          const name = $('.fr-name', card).value || 'Framing';
+          const lf = n($('.fr-lf', card).value, 0);
+          if (lf<=0) return null;
+          const win = n($('.fr-win', card).value,0);
+          const door= n($('.fr-door', card).value,0);
+          const clo = n($('.fr-closet', card).value,0);
+          const unitPrice = S.rate.fr * S.mult;
+          const base = lf * unitPrice;
+          const adders = (win * S.add.win + door * S.add.door + clo * S.add.closet) * S.mult;
+          const amount = base + adders;
+          const desc = `${name} — openings: W${win}/D${door}/C${clo}`;
+          return {job:'Framing', desc, qty:lf, unit:'LF', unitPrice, amount};
+        }
+        case 'insulation': {
+          const name = $('.ins-name', card).value || 'Insulation';
+          const area = n($('.ins-area', card).value, 0);
+          if (area<=0) return null;
+          const unitPrice = S.rate.ins * S.mult;
+          const amount = area * unitPrice;
+          return {job:'Insulation', desc:name, qty:area, unit:'ft²', unitPrice, amount};
+        }
+        case 'taping': {
+          const name = $('.tp-name', card).value || 'Taping';
+          const area = n($('.tp-area', card).value, 0);
+          if (area<=0) return null;
+          const unitPrice = S.rate.tp * S.mult;
+          const amount = area * unitPrice;
+          return {job:'Taping', desc:name, qty:area, unit:'ft²', unitPrice, amount};
+        }
+        case 'act': {
+          const name = $('.act-name', card).value || 'ACT ceilings';
+          const area = n($('.act-area', card).value, 0);
+          if (area<=0) return null;
+          const unitPrice = S.rate.act * S.mult;
+          const amount = area * unitPrice;
+          return {job:'ACT', desc:name, qty:area, unit:'ft²', unitPrice, amount};
+        }
+        case 'extras': {
+          const del = n($('.ex-delivery', card).value, 0);
+          const other = n($('.ex-other', card).value, 0);
+          const notes = $('.ex-notes', card).value || 'Extras';
+          const lines = [];
+          if (del>0) lines.push({job:'Extras', desc:`Delivery — ${notes}`, qty:1, unit:'ls', unitPrice:del, amount:del});
+          if (other>0) lines.push({job:'Extras', desc:`Other fees — ${notes}`, qty:1, unit:'ls', unitPrice:other, amount:other});
+          return lines.length? lines : null;
+        }
+        case 'custom': {
+          const name = $('.cu-name', card).value || 'Custom item';
+          const amt = n($('.cu-amount', card).value, 0);
+          if (amt<=0) return null;
+          return {job:'Custom', desc:name, qty:1, unit:'ls', unitPrice:amt, amount:amt};
+        }
+      }
+      return null;
+    }
+
+    function renderLines(items, S){
+      const tbody = $('#lines-body');
+      tbody.innerHTML = '';
+      if (!items.length){
+        tbody.innerHTML = '<tr><td colspan="6" class="muted">No items yet.</td></tr>';
+        setTotals(0,0,0,0);
+        return;
+      }
+      let sub = 0;
+      items.forEach(it=>{
+        sub += it.amount;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${esc(it.job)}</td>
+          <td>${esc(it.desc)}</td>
+          <td>${it.qty}</td>
+          <td>${it.unit}</td>
+          <td>${fmt(it.unitPrice)}</td>
+          <td>${fmt(it.amount)}</td>`;
+        tbody.appendChild(tr);
+      });
+      const gstVal = sub * (S.gst/100);
+      const pstVal = sub * (S.pst/100);
+      const total = sub + gstVal + pstVal;
+      setTotals(sub, gstVal, pstVal, total);
+    }
+
+    function setTotals(sub, gst, pst, total){
+      $('#kpi-sub').textContent = fmt(sub);
+      $('#kpi-gst').textContent = fmt(gst);
+      $('#kpi-pst').textContent = fmt(pst);
+      $('#kpi-total').textContent = fmt(total);
+      $('#ft-sub').textContent = fmt(sub);
+      $('#ft-gst').textContent = fmt(gst);
+      $('#ft-pst').textContent = fmt(pst);
+      $('#ft-total').textContent = fmt(total);
+    }
+
+    function esc(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]); }
+
+    // ====== Export CSV ======
+    $('#btn-export-csv').addEventListener('click', async ()=>{
+      calculate();
+      const rows = [];
+      rows.push(['Project', $('#p-name').value, '', '', '', '']);
+      rows.push(['Contractor', $('#p-gc').value, '', '', '', '']);
+      rows.push(['Location', $('#p-loc').value, '', '', '', '']);
+      rows.push([]);
+      rows.push(['Job','Description','Qty','Unit','Unit price','Amount']);
+      $$('#lines-body tr').forEach(tr=>{
+        const tds = Array.from(tr.children).map(td=> td.textContent.trim());
+        if (tds.length===6) rows.push(tds);
+      });
+      rows.push([]);
+      rows.push(['Subtotal','','','','', $('#kpi-sub').textContent]);
+      rows.push(['GST','','','','', $('#kpi-gst').textContent]);
+      rows.push(['PST','','','','', $('#kpi-pst').textContent]);
+      rows.push(['Total','','','','', $('#kpi-total').textContent]);
+
+      const csv = rows.map(r=> r.map(cell=> {
+        const c = (cell??'').toString();
+        return /[",\n]/.test(c) ? `"${c.replace(/"/g,'""')}"` : c;
+      }).join(',')).join('\n');
+
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const pn = ($('#p-name').value || 'estimate').replace(/[^\w\-]+/g,'_') + '_rough_estimate.csv';
+
+      // Try web share with file (mobile-friendly)
+      const file = new File([blob], pn, {type:'text/csv'});
+      if (navigator.share && navigator.canShare?.({files:[file]})) {
+        try { await navigator.share({files:[file], title:'BidCalc Rough Estimate', text:'Rough estimate CSV'}); toast('CSV shared.'); return; }
+        catch(e){ /* fallback to download */ }
+      }
+
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = pn;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast('CSV exported.');
+      console.debug('[analytics] export_csv');
+    });
+
+    // ====== Print / PDF ======
+    $('#btn-print').addEventListener('click', ()=>{
+      calculate();
+      window.print();
+      console.debug('[analytics] export_pdf_print');
+    });
+
+    // ====== Share link (encodes project, settings, jobs into URL) ======
+    $('#btn-share').addEventListener('click', ()=>{
+      const data = serializeAll();
+      const json = JSON.stringify(data);
+      const b64 = btoa(unescape(encodeURIComponent(json))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      const url = `${location.origin}${location.pathname}?data=${b64}`;
+      if (navigator.share) {
+        navigator.share({title:'BidCalc Rough', text:'Rough estimate link', url}).catch(()=>{});
+      } else {
+        navigator.clipboard?.writeText(url).then(()=> toast('Share link copied to clipboard.'), ()=> prompt('Copy this link:', url));
+      }
+      console.debug('[analytics] share_link');
+    });
+
+    // ====== Save / Load / New ======
+    $('#btn-save').addEventListener('click', ()=>{
+      const payload = serializeAll();
+      localStorage.setItem('bidcalc_rough_v1', JSON.stringify(payload));
+      toast('Draft saved in browser.');
+    });
+    $('#btn-load').addEventListener('click', ()=>{
+      const raw = localStorage.getItem('bidcalc_rough_v1');
+      if (!raw){ alert('No saved draft found.'); return; }
+      try{ loadFromData(JSON.parse(raw)); toast('Draft loaded.'); }
+      catch(e){ console.error(e); alert('Failed to load draft.'); }
+    });
+    $('#btn-new').addEventListener('click', ()=>{
+      if (!confirm('Clear the form?')) return;
+      $('#p-name').value=''; $('#p-gc').value=''; $('#p-loc').value='Winnipeg, MB';
+      $('#p-area').value=''; $('#p-floors').value='1'; $('#p-notes').value='';
+      resetRates();
+      jobsBox.innerHTML='';
+      renderLines([], readSettings());
+      toast('Cleared.');
+    });
+
+    $('#btn-reset-rates').addEventListener('click', resetRates);
+    function resetRates(){
+      $('#rate-dw').value='2.50';
+      $('#rate-fr').value='10.00';
+      $('#rate-ins').value='1.20';
+      $('#rate-tape').value='0.90';
+      $('#rate-act').value='4.50';
+      $('#adder-win').value='25.00';
+      $('#adder-door').value='30.00';
+      $('#adder-closet').value='20.00';
+      $('#multiplier').value='1.00';
+      $('#gst').value='0';
+      $('#pst').value='0';
+    }
+
+    function serializeAll(){
+      const settings = {
+        rate:{
+          dw: n($('#rate-dw').value), fr:n($('#rate-fr').value), ins:n($('#rate-ins').value),
+          tp:n($('#rate-tape').value), act:n($('#rate-act').value)
+        },
+        add:{ win:n($('#adder-win').value), door:n($('#adder-door').value), closet:n($('#adder-closet').value) },
+        mult: n($('#multiplier').value,1), gst:n($('#gst').value,0), pst:n($('#pst').value,0)
+      };
+      const project = {
+        name:$('#p-name').value, gc:$('#p-gc').value, loc:$('#p-loc').value,
+        area:$('#p-area').value, floors:$('#p-floors').value, notes:$('#p-notes').value
+      };
+      const jobs = [];
+      $$('.job-card', jobsBox).forEach(card=>{
+        const t = card.dataset.type;
+        switch(t){
+          case 'drywall':
+            jobs.push({t,
+              name:$('.dw-name', card).value, area:$('.dw-area', card).value,
+              ft:$('.dw-ft', card).value, inch:$('.dw-in', card).value,
+              notes:$('.dw-notes', card).value
+            }); break;
+          case 'framing':
+            jobs.push({t,
+              name:$('.fr-name', card).value, lf:$('.fr-lf', card).value,
+              win:$('.fr-win', card).value, door:$('.fr-door', card).value, closet:$('.fr-closet', card).value,
+              notes:$('.fr-notes', card).value
+            }); break;
+          case 'insulation':
+            jobs.push({t, name:$('.ins-name', card).value, area:$('.ins-area', card).value, notes:$('.ins-notes', card).value}); break;
+          case 'taping':
+            jobs.push({t, name:$('.tp-name', card).value, area:$('.tp-area', card).value, corners:$('.tp-corners', card).value, notes:$('.tp-notes', card).value}); break;
+          case 'act':
+            jobs.push({t, name:$('.act-name', card).value, area:$('.act-area', card).value, notes:$('.act-notes', card).value}); break;
+          case 'extras':
+            jobs.push({t, delivery:$('.ex-delivery', card).value, other:$('.ex-other', card).value, notes:$('.ex-notes', card).value}); break;
+          case 'custom':
+            jobs.push({t, name:$('.cu-name', card).value, amount:$('.cu-amount', card).value, notes:$('.cu-notes', card).value}); break;
+        }
+      });
+      return {project, settings, jobs};
+    }
+
+    function loadFromData(payload){
+      if (!payload) return;
+      const {project, settings, jobs} = payload;
+      if (project){
+        $('#p-name').value = project.name||'';
+        $('#p-gc').value   = project.gc||'';
+        $('#p-loc').value  = project.loc||'Winnipeg, MB';
+        $('#p-area').value = project.area||'';
+        $('#p-floors').value = project.floors||'1';
+        $('#p-notes').value = project.notes||'';
+      }
+      if (settings){
+        $('#rate-dw').value = settings.rate?.dw ?? 2.5;
+        $('#rate-fr').value = settings.rate?.fr ?? 10;
+        $('#rate-ins').value= settings.rate?.ins ?? 1.2;
+        $('#rate-tape').value= settings.rate?.tp ?? 0.9;
+        $('#rate-act').value= settings.rate?.act ?? 4.5;
+        $('#adder-win').value= settings.add?.win ?? 25;
+        $('#adder-door').value= settings.add?.door ?? 30;
+        $('#adder-closet').value= settings.add?.closet ?? 20;
+        $('#multiplier').value = settings.mult ?? 1;
+        $('#gst').value = settings.gst ?? 0;
+        $('#pst').value = settings.pst ?? 0;
+      }
+      jobsBox.innerHTML = '';
+      (jobs||[]).forEach(j=> addJob(j.t, j));
+      calculate();
+    }
+
+    // ====== Load from URL ?data=... if present ======
+    (function(){
+      const usp = new URLSearchParams(location.search);
+      const b64 = usp.get('data');
+      if (!b64) return;
+      try{
+        const json = decodeURIComponent(escape(atob(b64.replace(/-/g,'+').replace(/_/g,'/'))));
+        loadFromData(JSON.parse(json));
+        toast('Loaded from shared link.');
+      }catch(e){ console.warn('Failed to parse shared data', e); }
+    })();
+
+    // ====== Toast ======
+    let toastTimer;
+    function toast(msg){
+      const t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+    }
+
+    // Expose for debugging
+    window.__Rough = { addJob, calculate, serializeAll };
+  })();
+  </script>
+
+  <!-- PWA: register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>
