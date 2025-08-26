@@ -136,6 +136,51 @@
     .tag,.pill{ ... }
     th{ ... }
   }
+
+  /* === Mobile polish === */
+  #rough .toolbar{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
+  #rough .toolbar label{ margin:0; }
+  #rough #job-select{ width:100%; }
+  #btn-add{ min-width:120px; }
+
+  /* компактные «призрачные» кнопки в заголовке карточек */
+  .job-card header .toolbar button{ min-height:40px; padding:8px 12px; border-radius:10px; }
+
+  /* более спокойные «пилюли» и KPI */
+  .tag,.pill{ background:#EEF2FF; color:#0F172A; border:1px solid #CBD5FF; }
+  .kpi .box{ background:#F5F7FF; color:#0F172A; border:1px solid #D7DDF7; }
+
+  /* таблица и ячейки чуть компактнее */
+  table{ font-size:14px; }
+  th,td{ padding:8px 10px; }
+
+  /* ——— узкие экраны ——— */
+  @media (max-width: 480px){
+    body{ padding:16px; }
+    h1{ font-size:26px; line-height:1.15; letter-spacing:-0.01em; }
+
+    /* шапки секций: в колонку, действия слева */
+    #project .grid-2, #settings .grid-2, #rough .grid-2, #summary .grid-2{
+      grid-template-columns: 1fr; gap:12px;
+    }
+    .right{ text-align:left; }
+
+    /* карточки и панели компактнее */
+    .section{ padding:14px; border-radius:14px; }
+    .panel{ border-radius:14px; }
+
+    /* карточка job: кнопки под заголовком, на всю ширину */
+    .job-card header{ flex-direction:column; align-items:stretch; gap:8px; }
+    .job-card header .toolbar{ justify-content:flex-start; gap:8px; }
+    .job-card header .toolbar button{ width:100%; }
+
+    /* KPI ужимаются в две колонки */
+    .kpi .box{ min-width:140px; flex:1 1 140px; }
+
+    /* тапы без зума на iOS */
+    input,select,textarea,button{ font-size:16px; }
+  }
+
   </style>
 
 </head>
