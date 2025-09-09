@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0a62ff">
   <link rel="manifest" href="manifest.webmanifest">
+
   <!-- iOS A2HS -->
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,187 +14,125 @@
   <meta name="apple-mobile-web-app-title" content="BidCalc">
 
   <style>
-  /* === BidCalc UI v2 — calm & readable === */
-  :root{
-    /* Цвета */
-    --bg:#F7F8FC;
-    --card:#FFFFFF;
-    --panel:#F3F6FF;
-    --border:#E6EAF2;
-    --ink:#0F172A;
-    --muted:#6B7280;
-    --brand:#0A62FF;        /* твой фирменный */
-    --brand-ink:#FFFFFF;
-    --ok:#12B981;
-    --warn:#B45309;
-
-    /* Радиусы/тени/типографика */
-    --r-lg:16px; --r-md:12px; --r-sm:10px;
-    --shadow-sm:0 2px 10px rgba(16,24,40,.05);
-    --shadow:0 8px 24px rgba(16,24,40,.06);
-
-    --h1:30px; --h2:22px; --h3:18px;
-    --lh:1.58;
-  }
-
-  /* База */
-  *{ box-sizing:border-box; }
-  html,body{ height:100%; }
-  body{
-    margin:0; padding:24px; max-width:1024px;
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color:var(--ink); background:var(--bg); line-height:var(--lh); letter-spacing:.1px;
-  }
-
-  /* Заголовки и тексты */
-  h1{ margin:0 0 8px; font-size:var(--h1); font-weight:700; }
-  h2{ margin:24px 0 12px; font-size:var(--h2); font-weight:700; }
-  h3{ margin:18px 0 10px; font-size:var(--h3); font-weight:600; }
-  h4,h5{ margin:10px 0 6px; font-weight:600; }
-  p, small, .muted{ color:var(--muted); }
-
-  /* Карточки/панели */
-  .section{
-    background:var(--card); border:1px solid var(--border);
-    border-radius:var(--r-lg); padding:18px; box-shadow:var(--shadow);
-    margin-top:16px;
-  }
-  .panel{
-    background:var(--panel); border:1px dashed var(--border);
-    border-radius:var(--r-lg); padding:12px;
-  }
-  .job-card header{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-  .job-card header h4{ margin:0; }
-
-  /* Сетка */
-  .row{ display:flex; gap:12px; flex-wrap:wrap; }
-  .row > div{ flex:1 1 220px; min-width:220px; }
-  .grid-2{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
-  .right{ text-align:right; }
-
-  /* Инпуты/селекты */
-  input[type="text"], input[type="number"], select, textarea{
-    width:100%; min-height:44px; padding:12px 12px;
-    border:1px solid var(--border); border-radius:var(--r-md);
-    background:#fff; color:var(--ink);
-  }
-  textarea{ min-height:72px; resize:vertical; }
-  input::placeholder, textarea::placeholder{ color:#9AA3B2; }
-  input:focus, select:focus, textarea:focus{
-    outline:2px solid color-mix(in srgb, var(--brand) 35%, transparent);
-    border-color:var(--brand);
-    box-shadow:0 0 0 4px rgba(10,98,255,.12);
-  }
-
-  /* Кнопки */
-  button{
-    font: inherit; min-height:44px; padding:10px 16px;
-    border:1px solid var(--border); border-radius:var(--r-md);
-    background:#fff; color:var(--ink); cursor:pointer;
-  }
-  button:hover{ background:#F9FAFB; border-color:#D3D8E0; }
-  button:active{ transform:translateY(0.5px); }
-  button.primary{ background:var(--brand); color:var(--brand-ink); border-color:var(--brand); }
-  button.primary:hover{ filter:brightness(.97); }
-  button.danger{ border-color:#D92D20; color:#D92D20; background:#fff; }
-
-  /* Теги/пилюли/KPI */
-  .tag,.pill{
-    display:inline-block; font-size:12px; padding:3px 8px; border-radius:999px;
-    background:#EEF2FF; color:#0F172A; border:1px solid #CBD5FF; /* тёмный текст */
-  }
-  .kpi .box{
-    background:#F5F7FF; color:#0F172A;
-    border:1px solid #D7DDF7; border-radius:14px;
-    padding:10px 12px; min-width:180px;
-  }
-
-
-  /* Таблица */
-  table{ width:100%; border-collapse:collapse; border-radius:12px; overflow:hidden; }
-  th, td{ border:1px solid var(--border); padding:10px 12px; }
-  th{ background:#F3F6FF; text-align:left; }
-
-  /* Служебные */
-  .hidden{ display:none !important; }
-  .warning{ color:var(--warn); font-style:italic; margin-top:6px; }
-<div class="toolbar">  .ok{ color:var(--ok); }
-  .toolbar{ display:flex; gap:8px; flex-wrap:wrap; }
-
-  /* Печать */
-  @media print{
-    .no-print{ display:none !important; }
-    body{ padding:0 12mm; background:#fff; }
-    .section{ border:none; background:#fff; padding:0; margin:8px 0; box-shadow:none; }
-    .panel{ border:none; background:#fff; }
-    button{ display:none !important; }
-    a{ color:inherit; text-decoration:none; }
-  }
-
-  /* Необязательный авто-тёмный режим */
-  @media (prefers-color-scheme: dark){
-    :root{  ... }
-    .tag,.pill{ ... }
-    th{ ... }
-  }
-
-  /* === Mobile polish === */
-  #rough .toolbar{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
-  #rough .toolbar label{ margin:0; }
-  #rough #job-select{ width:100%; }
-  #btn-add{ min-width:120px; }
-
-  /* компактные «призрачные» кнопки в заголовке карточек */
-  .job-card header .toolbar button{ min-height:40px; padding:8px 12px; border-radius:10px; }
-
-  /* более спокойные «пилюли» и KPI */
-  .tag,.pill{ background:#EEF2FF; color:#0F172A; border:1px solid #CBD5FF; }
-  .kpi .box{ background:#F5F7FF; color:#0F172A; border:1px solid #D7DDF7; }
-
-  /* таблица и ячейки чуть компактнее */
-  table{ font-size:14px; }
-  th,td{ padding:8px 10px; }
-
-  /* ——— узкие экраны ——— */
-  @media (max-width: 480px){
-    body{ padding:16px; }
-    h1{ font-size:26px; line-height:1.15; letter-spacing:-0.01em; }
-
-    /* шапки секций: в колонку, действия слева */
-    #project .grid-2, #settings .grid-2, #rough .grid-2, #summary .grid-2{
-      grid-template-columns: 1fr; gap:12px;
+    :root{
+      --card:#f9f9f9; --panel:#fcfcfc; --border:#dadada; --ink:#111; --muted:#555;
+      --brand:#0a62ff; --brand-ink:#fff; --warn:#8a2d2d; --ok:#0f7b0f;
+      --shadow: 0 2px 10px rgba(0,0,0,.06);
     }
-    .right{ text-align:left; }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink); margin:0 auto; padding:16px; max-width:1024px; background:#fff;
+    }
+    h1{ margin: 0 0 6px; font-weight:700; }
+    h2{ margin: 20px 0 10px; }
+    h3{ margin: 16px 0 8px; }
+    h4,h5{ margin: 10px 0 6px; }
+    p{ color:var(--muted); margin:6px 0 0; }
+    label{ display:block; margin-top:8px; font-weight:600; }
+    small, .muted{ color:var(--muted); }
+    input, select, button, textarea{ font: inherit; }
+    input[type="text"], input[type="number"], select, textarea{
+      width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff;
+    }
+    input[type="number"]{ -moz-appearance:textfield; }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+    textarea{ min-height:72px; resize:vertical; }
+    button{
+      padding:10px 14px; border-radius:12px; border:1px solid var(--border);
+      background:#fff; cursor:pointer; box-shadow: var(--shadow);
+    }
+    button:hover{ border-color:#bdbdbd; }
+    .primary{ background:var(--brand); color:var(--brand-ink); border-color: var(--brand); }
+    .danger{ border-color:#c33; color:#c33; background:#fff; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; }
+    .row > div{ flex:1 1 220px; min-width:220px; }
+    .section{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-top:16px; box-shadow: var(--shadow); }
+    .panel{ background:var(--panel); border:1px dashed var(--border); border-radius:12px; padding:12px; }
+    .hidden{ display:none !important; }
+    .tag{ display:inline-block; font-size:12px; padding:3px 8px; border-radius:999px; background:#eef3ff; border:1px solid #cbd8ff; color:#2042a5; }
+    .right{ text-align:right; }
+    .warning{ color:var(--warn); font-style:italic; margin-top:6px; }
+    .ok{ color:var(--ok); }
+    .grid-2{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
+    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; }
+    .job-card header{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .job-card header h4{ margin:0; }
+    .pill{ font-size:12px; padding:2px 6px; border-radius:999px; background:#eee; }
+    .kpi{ display:flex; gap:12px; flex-wrap:wrap; }
+    .kpi .box{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:10px 12px; min-width:160px; box-shadow: var(--shadow);}
+    .kpi .box b{ font-size:18px; }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ border:1px solid var(--border); padding:10px; }
+    th{ background:#f3f6ff; text-align:left; }
+    tfoot td{ font-weight:700; }
+    #toast{
+      position: fixed; left:50%; bottom:20px; transform: translateX(-50%);
+      background:#222; color:#fff; padding:8px 12px; border-radius:8px; font-size:13px; z-index:9999;
+    }
 
-    /* карточки и панели компактнее */
-    .section{ padding:14px; border-radius:14px; }
-    .panel{ border-radius:14px; }
+    /* Install banner (Android) */
+    #install-bar{
+      position:sticky; top:0; z-index:999; display:none;
+      padding:10px 12px; border:1px solid var(--border); background:#fff; border-radius:12px; margin-bottom:10px;
+      box-shadow: var(--shadow);
+    }
 
-    /* карточка job: кнопки под заголовком, на всю ширину */
-    .job-card header{ flex-direction:column; align-items:stretch; gap:8px; }
-    .job-card header .toolbar{ justify-content:flex-start; gap:8px; }
-    .job-card header .toolbar button{ width:100%; }
+    /* iOS A2HS hint */
+    #ios-a2hs{
+      display:none; margin-top:10px; position:relative;
+    }
+    #ios-a2hs .close{
+      position:absolute; right:8px; top:8px; border:none; background:transparent; font-size:16px; cursor:pointer;
+    }
 
-    /* KPI ужимаются в две колонки */
-    .kpi .box{ min-width:140px; flex:1 1 140px; }
+    /* Better mobile spacing */
+    @media (max-width: 720px){
+      body{ padding:12px; }
+      .row > div{ min-width: 46%; flex:1 1 46%; }
+      .toolbar button{ flex: 1 0 auto; }
+      .kpi .box{ min-width: 45%; }
+      #lines{ font-size: 14px; }
+      th, td{ padding:8px; }
+    }
 
-    /* тапы без зума на iOS */
-    input,select,textarea,button{ font-size:16px; }
-  }
-
+    /* Print */
+    @media print{
+      .no-print{ display:none !important; }
+      body{ padding:0 10mm; }
+      .section{ border:none; background:#fff; padding:0; margin: 8px 0; box-shadow:none; }
+      .panel{ border:none; background:#fff; }
+      button, a{ display:none !important; }
+      a{ color:inherit; text-decoration:none; }
+    }
   </style>
-
 </head>
 <body>
+  <!-- Android install banner -->
+  <div id="install-bar" class="no-print">
+    <div class="row" style="align-items:center; gap:10px;">
+      <div style="flex:1;">
+        <b>Install BidCalc</b><br>
+        <small class="muted">Add to your home screen for offline access.</small>
+      </div>
+      <div><button id="btn-install" class="primary">Install</button></div>
+      <div><button id="btn-install-close" class="danger">Later</button></div>
+    </div>
+  </div>
+
   <header class="grid-2">
     <div>
       <h1>BidCalc — Rough Estimate <span class="tag">Free</span></h1>
       <p class="muted">Budgetary estimate for quick planning. For detailed materials & labor, Precise (Pro) is coming later.</p>
     </div>
     <div class="right no-print">
-      <button id="btn-save" title="Save to this browser">Save draft</button>
-      <button id="btn-load" title="Load last saved">Load draft</button>
-      <button id="btn-new" class="danger" title="Clear everything">New</button>
+      <div class="toolbar">
+        <button id="btn-save" title="Save to this browser">Save draft</button>
+        <button id="btn-load" title="Load last saved">Load draft</button>
+        <button id="btn-new" class="danger" title="Clear everything">New</button>
+      </div>
     </div>
   </header>
 
@@ -206,11 +145,35 @@
       <div><label>Location <input type="text" id="p-loc" value="Winnipeg, MB"></label></div>
     </div>
     <div class="row">
-      <div><label>Building area (ft²) <input type="number" inputmode="decimal" id="p-area" min="0" step="1" placeholder="e.g., 3500"></label></div>
-      <div><label>Number of floors <input type="number" inputmode="decimal" id="p-floors" min="1" step="1" value="1"></label></div>
+      <div><label>Building area (ft²) <input type="number" id="p-area" min="0" step="1" placeholder="e.g., 3500"></label></div>
+      <div><label>Number of floors <input type="number" id="p-floors" min="1" step="1" value="1"></label></div>
       <div><label>Notes (internal) <input type="text" id="p-notes" placeholder="Optional note for this estimate"></label></div>
     </div>
+
+    <!-- Site services -->
+    <div class="panel" id="site">
+      <h3>Site services</h3>
+      <div class="row">
+        <div><label style="font-weight:500;"><input type="checkbox" id="site-power"> Temporary power available</label></div>
+        <div><label style="font-weight:500;"><input type="checkbox" id="site-water"> Water on site</label></div>
+        <div><label style="font-weight:500;"><input type="checkbox" id="site-heat"> Heat available</label></div>
+        <div><label style="font-weight:500;"><input type="checkbox" id="site-bin"> Waste bin on site</label></div>
+        <div><label style="font-weight:500;"><input type="checkbox" id="site-wc"> Washroom for crew</label></div>
+      </div>
+      <div class="row">
+        <div><label>Access / working hours <input type="text" id="site-access" placeholder="e.g., 7am–6pm, M–F, loading dock 9–12"></label></div>
+        <div><label>Logistics notes <input type="text" id="site-notes" placeholder="Hoist, floor loading limits, elevator, etc."></label></div>
+      </div>
+      <small class="muted">These flags do not change totals yet; add them to your printed notes.</small>
+    </div>
+
     <div class="warning">⚠️ This is a budgetary estimate only; not a formal quote. Rates are placeholders — adjust under Settings.</div>
+
+    <!-- iOS A2HS hint -->
+    <div id="ios-a2hs" class="panel no-print">
+      <button class="close" aria-label="Close">✕</button>
+      On iPhone: open in <b>Safari</b> → Share → <b>Add to Home Screen</b> to install.
+    </div>
   </section>
 
   <!-- Rates & settings -->
@@ -225,25 +188,25 @@
       <div class="panel" style="flex:2;">
         <h4>Unit rates</h4>
         <div class="row">
-          <div><label>Drywall ($/ft²) <input type="number" inputmode="decimal" id="rate-dw" min="0" step="0.01" value="2.50"></label></div>
-          <div><label>Framing ($/LF) <input type="number" inputmode="decimal" id="rate-fr" min="0" step="0.01" value="10.00"></label></div>
-          <div><label>Insulation ($/ft²) <input type="number" inputmode="decimal" id="rate-ins" min="0" step="0.01" value="1.20"></label></div>
-          <div><label>Taping ($/ft²) <input type="number" inputmode="decimal" id="rate-tape" min="0" step="0.01" value="0.90"></label></div>
-          <div><label>ACT ceilings ($/ft²) <input type="number" inputmode="decimal" id="rate-act" min="0" step="0.01" value="4.50"></label></div>
+          <div><label>Drywall ($/ft²) <input type="number" id="rate-dw" min="0" step="0.01" value="2.50"></label></div>
+          <div><label>Framing ($/LF) <input type="number" id="rate-fr" min="0" step="0.01" value="10.00"></label></div>
+          <div><label>Insulation ($/ft²) <input type="number" id="rate-ins" min="0" step="0.01" value="1.20"></label></div>
+          <div><label>Taping ($/ft²) <input type="number" id="rate-tape" min="0" step="0.01" value="0.90"></label></div>
+          <div><label>ACT ceilings ($/ft²) <input type="number" id="rate-act" min="0" step="0.01" value="4.50"></label></div>
         </div>
-        <h5 style="margin-top:10px;">Framing openers adders (per opening)</h5>
+        <h5 style="margin-top:10px;">Framing openings adders (per opening)</h5>
         <div class="row">
-          <div><label>Window adder ($/ea) <input type="number" inputmode="decimal" id="adder-win" min="0" step="0.01" value="25.00"></label></div>
-          <div><label>Door adder ($/ea) <input type="number" inputmode="decimal" id="adder-door" min="0" step="0.01" value="30.00"></label></div>
-          <div><label>Closet adder ($/ea) <input type="number" inputmode="decimal" id="adder-closet" min="0" step="0.01" value="20.00"></label></div>
+          <div><label>Window adder ($/ea) <input type="number" id="adder-win" min="0" step="0.01" value="25.00"></label></div>
+          <div><label>Door adder ($/ea) <input type="number" id="adder-door" min="0" step="0.01" value="30.00"></label></div>
+          <div><label>Closet adder ($/ea) <input type="number" id="adder-closet" min="0" step="0.01" value="20.00"></label></div>
         </div>
       </div>
       <div class="panel" style="flex:1;">
         <h4>Regional & tax</h4>
         <div class="row">
-          <div><label>Regional multiplier <input type="number" inputmode="decimal" id="multiplier" min="0.5" step="0.01" value="1.00"></label></div>
-          <div><label>GST % <input type="number" inputmode="decimal" id="gst" min="0" step="0.1" value="0"></label></div>
-          <div><label>PST % <input type="number" inputmode="decimal" id="pst" min="0" step="0.1" value="0"></label></div>
+          <div><label>Regional multiplier <input type="number" id="multiplier" min="0.5" step="0.01" value="1.00"></label></div>
+          <div><label>GST % <input type="number" id="gst" min="0" step="0.1" value="0"></label></div>
+          <div><label>PST % <input type="number" id="pst" min="0" step="0.1" value="0"></label></div>
         </div>
         <small class="muted">Taxes are optional; set to 0% if not applicable in your quote.</small>
       </div>
@@ -257,7 +220,7 @@
       <div class="right no-print">
         <div class="toolbar">
           <label style="margin:0;">
-            <select id="job-select">
+            <select id="job-select" aria-label="Select job type">
               <option value="" selected disabled>Select a job type…</option>
               <option value="drywall">Drywall</option>
               <option value="framing">Framing</option>
@@ -272,6 +235,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Dynamic job cards go here -->
     <div id="jobs" style="display:flex; flex-direction:column; gap:12px; margin-top:10px;"></div>
   </section>
 
@@ -289,7 +254,7 @@
       </div>
     </div>
 
-    <div id="kpis" class="kpi">
+    <div class="kpi" role="status" aria-live="polite">
       <div class="box"><div class="muted">Subtotal</div><b id="kpi-sub">$0.00</b></div>
       <div class="box"><div class="muted">GST</div><b id="kpi-gst">$0.00</b></div>
       <div class="box"><div class="muted">PST</div><b id="kpi-pst">$0.00</b></div>
@@ -336,12 +301,12 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="dw-name" placeholder="e.g., Level 2 — corridors"></label></div>
-        <div><label>Total drywall coverage (ft²) <input type="number" inputmode="decimal" class="dw-area" min="0" step="1"></label></div>
+        <div><label>Total drywall coverage (ft²) <input type="number" class="dw-area" min="0" step="1"></label></div>
       </div>
       <label>Ceiling height (optional)</label>
       <div class="row">
-        <div><input type="number" inputmode="decimal" class="dw-ft inch-ft" placeholder="ft" min="0"></div>
-        <div><input type="number" inputmode="decimal" class="dw-in inch-in" placeholder='in (max 11.875")' min="0" step="0.125"></div>
+        <div><input type="number" class="dw-ft inch-ft" placeholder="ft" min="0"></div>
+        <div><input type="number" class="dw-in inch-in" placeholder='in (max 11.875")' min="0" step="0.125"></div>
       </div>
       <div class="warning">Max inches is 11&nbsp;7/8" (11.875"). If 12"+ entered, it converts to extra feet.</div>
       <label>Notes <input type="text" class="dw-notes" placeholder="Optional note"></label>
@@ -358,13 +323,13 @@
         </div>
       </header>
       <div class="row">
-        <div><label>Area name <input type="text" class="fr-name" placeholder="e.g., West wall"></label></div>
-        <div><label>Linear feet (approx) <input type="number" inputmode="decimal" class="fr-lf" min="0" step="0.1"></label></div>
+        <div><label>Area name <input type="text" class="fr-name" placeholder="e.g., West wall"></label></></div>
+        <div><label>Linear feet (approx) <input type="number" class="fr-lf" min="0" step="0.1"></label></div>
       </div>
       <div class="row">
-        <div><label>Windows <input type="number" inputmode="decimal" class="fr-win" min="0" step="1" value="0"></label></div>
-        <div><label>Doors <input type="number" inputmode="decimal" class="fr-door" min="0" step="1" value="0"></label></div>
-        <div><label>Closets <input type="number" inputmode="decimal" class="fr-closet" min="0" step="1" value="0"></label></div>
+        <div><label>Windows <input type="number" class="fr-win" min="0" step="1" value="0"></label></div>
+        <div><label>Doors <input type="number" class="fr-door" min="0" step="1" value="0"></label></div>
+        <div><label>Closets <input type="number" class="fr-closet" min="0" step="1" value="0"></label></div>
       </div>
       <label>Notes <input type="text" class="fr-notes" placeholder="Optional note"></label>
     </div>
@@ -381,7 +346,7 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="ins-name" placeholder="e.g., Exterior walls L2"></label></div>
-        <div><label>Estimated area (ft²) <input type="number" inputmode="decimal" class="ins-area" min="0" step="1"></label></div>
+        <div><label>Estimated area (ft²) <input type="number" class="ins-area" min="0" step="1"></label></div>
       </div>
       <label>Notes <input type="text" class="ins-notes" placeholder="Optional note"></label>
     </div>
@@ -398,10 +363,10 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="tp-name" placeholder="e.g., Level 1 — offices"></label></div>
-        <div><label>Drywall area taped (ft²) <input type="number" inputmode="decimal" class="tp-area" min="0" step="1"></label></div>
+        <div><label>Drywall area taped (ft²) <input type="number" class="tp-area" min="0" step="1"></label></div>
       </div>
       <div class="row">
-        <div><label>Number of corners <input type="number" inputmode="decimal" class="tp-corners" min="0" step="1" value="0"></label></div>
+        <div><label>Number of corners <input type="number" class="tp-corners" min="0" step="1" value="0"></label></div>
       </div>
       <label>Notes <input type="text" class="tp-notes" placeholder="Optional note"></label>
     </div>
@@ -418,7 +383,7 @@
       </header>
       <div class="row">
         <div><label>Area name <input type="text" class="act-name" placeholder="e.g., Open office"></label></div>
-        <div><label>Drop ceiling area (ft²) <input type="number" inputmode="decimal" class="act-area" min="0" step="1"></label></div>
+        <div><label>Drop ceiling area (ft²) <input type="number" class="act-area" min="0" step="1"></label></div>
       </div>
       <label>Notes <input type="text" class="act-notes" placeholder="Optional note"></label>
     </div>
@@ -434,8 +399,8 @@
         </div>
       </header>
       <div class="row">
-        <div><label>Delivery estimate ($) <input type="number" inputmode="decimal" class="ex-delivery" min="0" step="0.01"></label></div>
-        <div><label>Other fees ($) <input type="number" inputmode="decimal" class="ex-other" min="0" step="0.01"></label></div>
+        <div><label>Delivery estimate ($) <input type="number" class="ex-delivery" min="0" step="0.01"></label></div>
+        <div><label>Other fees ($) <input type="number" class="ex-other" min="0" step="0.01"></label></div>
       </div>
       <label>Notes <input type="text" class="ex-notes" placeholder="Optional note"></label>
     </div>
@@ -452,7 +417,7 @@
       </header>
       <div class="row">
         <div><label>Item name <input type="text" class="cu-name" placeholder="e.g., Demolition allowance"></label></div>
-        <div><label>Amount ($) <input type="number" inputmode="decimal" class="cu-amount" min="0" step="0.01"></label></div>
+        <div><label>Amount ($) <input type="number" class="cu-amount" min="0" step="0.01"></label></div>
       </div>
       <label>Notes <input type="text" class="cu-notes" placeholder="Optional note"></label>
     </div>
@@ -467,11 +432,48 @@
     const $$ = (sel, root=document)=> Array.from(root.querySelectorAll(sel));
     const n  = (v,d=0)=>{ const x=parseFloat(v); return Number.isFinite(x)?x:d; };
     const fmt = v => '$' + (Number(v||0).toFixed(2));
+    const esc = s => String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]);
 
+    // ===== PWA: service worker + install prompt =====
+    if ('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    }
+    let deferredPrompt = null;
+    const installBar = $('#install-bar');
+    const btnInstall = $('#btn-install');
+    const btnInstallClose = $('#btn-install-close');
+
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault();
+      deferredPrompt = e;
+      installBar.style.display = 'block';
+    });
+    btnInstall?.addEventListener('click', async ()=>{
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBar.style.display = 'none';
+    });
+    btnInstallClose?.addEventListener('click', ()=>{
+      installBar.style.display = 'none';
+    });
+
+    // iOS A2HS hint (Safari only, not in standalone)
+    (function(){
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isStandalone = window.navigator.standalone === true;
+      if (isIOS && !isStandalone){
+        const box = $('#ios-a2hs');
+        box.style.display = 'block';
+        box.querySelector('.close').addEventListener('click', ()=> box.style.display='none');
+      }
+    })();
+
+    // ===== Jobs builder =====
     const jobsBox = $('#jobs');
     const jobSelect = $('#job-select');
 
-    // ====== Add job cards ======
     const templates = {
       drywall:  $('#tpl-drywall'),
       framing:  $('#tpl-framing'),
@@ -487,8 +489,9 @@
 
     function addSelected(){
       const kind = jobSelect.value;
-      if (!kind){ alert('Please select a job type.'); return; }
+      if (!kind){ alert('Please select a job type.'); jobSelect.focus(); return; }
       addJob(kind);
+      // keep selection for fast repeated adds
     }
 
     function addJob(kind, data){
@@ -511,9 +514,9 @@
           target.value = el.value;
         });
       });
-      // Inches normalization for drywall height
+      // Inches normalization for drywall height (optional UI)
       if (kind==='drywall'){ bindInchesPair($('.dw-ft', node), $('.dw-in', node)); }
-      // Apply incoming data (load/share)
+      // Apply data (load/share)
       if (data){ hydrateJob(node, kind, data); }
       jobsBox.appendChild(node);
       return node;
@@ -535,7 +538,7 @@
       });
     }
 
-    // ====== Inches normalization (ft + in, cap 11.875) ======
+    // ===== Inches normalization (ft + in, cap 11.875) =====
     function bindInchesPair(ftEl, inEl){
       if (!ftEl || !inEl) return;
       const normalize = ()=>{
@@ -543,7 +546,8 @@
         let inc = n(inEl.value,0);
         if (inc >= 12){
           const add = Math.floor(inc/12);
-          ft += add; inc = inc - add*12;
+          ft += add;
+          inc = inc - add*12;
           toast('Inches ≥ 12" converted to additional feet.');
         }
         if (inc > 11.875){
@@ -561,9 +565,7 @@
       });
     }
 
-    // ====== Calculate ======
-    $('#btn-calc').addEventListener('click', calculate);
-
+    // ===== Settings =====
     function readSettings(){
       return {
         rate: {
@@ -584,15 +586,18 @@
       };
     }
 
+    // ===== Calculate =====
+    $('#btn-calc').addEventListener('click', calculate);
+
     function calculate(){
-      const S = readSettings();
+      const settings = readSettings();
       const items = [];
       $$('.job-card', jobsBox).forEach(card=>{
         const type = card.dataset.type;
-        const it = calcItem(type, card, S);
+        const it = calcItem(type, card, settings);
         if (it) items.push(...(Array.isArray(it)? it : [it]));
       });
-      renderLines(items, S);
+      renderLines(items, settings);
       console.debug('[analytics] rough_calculate', {items: items.length});
     }
 
@@ -702,15 +707,23 @@
       $('#ft-total').textContent = fmt(total);
     }
 
-    function esc(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' })[c]); }
-
-    // ====== Export CSV ======
-    $('#btn-export-csv').addEventListener('click', async ()=>{
+    // ===== Export CSV =====
+    $('#btn-export-csv').addEventListener('click', ()=>{
       calculate();
       const rows = [];
       rows.push(['Project', $('#p-name').value, '', '', '', '']);
       rows.push(['Contractor', $('#p-gc').value, '', '', '', '']);
       rows.push(['Location', $('#p-loc').value, '', '', '', '']);
+      rows.push(['Site services',
+        [
+          $('#site-power').checked?'Power':'No power',
+          $('#site-water').checked?'Water':'No water',
+          $('#site-heat').checked?'Heat':'No heat',
+          $('#site-bin').checked?'Bin':'No bin',
+          $('#site-wc').checked?'Washroom':'No washroom',
+        ].join(' | '),
+        $('#site-access').value, $('#site-notes').value, '', ''
+      ]);
       rows.push([]);
       rows.push(['Job','Description','Qty','Unit','Unit price','Amount']);
       $$('#lines-body tr').forEach(tr=>{
@@ -723,24 +736,16 @@
       rows.push(['PST','','','','', $('#kpi-pst').textContent]);
       rows.push(['Total','','','','', $('#kpi-total').textContent]);
 
-      const csv = rows.map(r=> r.map(cell=> {
+      const csv = rows.map(r=> r.map(cell=>{
         const c = (cell??'').toString();
         return /[",\n]/.test(c) ? `"${c.replace(/"/g,'""')}"` : c;
       }).join(',')).join('\n');
 
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const pn = ($('#p-name').value || 'estimate').replace(/[^\w\-]+/g,'_') + '_rough_estimate.csv';
-
-      // Try web share with file (mobile-friendly)
-      const file = new File([blob], pn, {type:'text/csv'});
-      if (navigator.share && navigator.canShare?.({files:[file]})) {
-        try { await navigator.share({files:[file], title:'BidCalc Rough Estimate', text:'Rough estimate CSV'}); toast('CSV shared.'); return; }
-        catch(e){ /* fallback to download */ }
-      }
-
       const a = document.createElement('a');
+      const pn = ($('#p-name').value || 'estimate').replace(/[^\w\-]+/g,'_');
       a.href = URL.createObjectURL(blob);
-      a.download = pn;
+      a.download = `${pn}_rough_estimate.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -748,45 +753,52 @@
       console.debug('[analytics] export_csv');
     });
 
-    // ====== Print / PDF ======
+    // ===== Print / PDF =====
     $('#btn-print').addEventListener('click', ()=>{
       calculate();
       window.print();
       console.debug('[analytics] export_pdf_print');
     });
 
-    // ====== Share link (encodes project, settings, jobs into URL) ======
+    // ===== Share link =====
     $('#btn-share').addEventListener('click', ()=>{
       const data = serializeAll();
       const json = JSON.stringify(data);
       const b64 = btoa(unescape(encodeURIComponent(json))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
       const url = `${location.origin}${location.pathname}?data=${b64}`;
-      if (navigator.share) {
-        navigator.share({title:'BidCalc Rough', text:'Rough estimate link', url}).catch(()=>{});
-      } else {
-        navigator.clipboard?.writeText(url).then(()=> toast('Share link copied to clipboard.'), ()=> prompt('Copy this link:', url));
-      }
+      navigator.clipboard?.writeText(url).then(()=>{
+        toast('Share link copied to clipboard.');
+      }, ()=>{
+        prompt('Copy this link:', url);
+      });
       console.debug('[analytics] share_link');
     });
 
-    // ====== Save / Load / New ======
+    // ===== Save / Load / New =====
     $('#btn-save').addEventListener('click', ()=>{
       const payload = serializeAll();
-      localStorage.setItem('bidcalc_rough_v1', JSON.stringify(payload));
+      localStorage.setItem('bidcalc_rough_v2', JSON.stringify(payload));
       toast('Draft saved in browser.');
     });
     $('#btn-load').addEventListener('click', ()=>{
-      const raw = localStorage.getItem('bidcalc_rough_v1');
+      const raw = localStorage.getItem('bidcalc_rough_v2') || localStorage.getItem('bidcalc_rough_v1');
       if (!raw){ alert('No saved draft found.'); return; }
       try{ loadFromData(JSON.parse(raw)); toast('Draft loaded.'); }
       catch(e){ console.error(e); alert('Failed to load draft.'); }
     });
     $('#btn-new').addEventListener('click', ()=>{
       if (!confirm('Clear the form?')) return;
+      // clear project
       $('#p-name').value=''; $('#p-gc').value=''; $('#p-loc').value='Winnipeg, MB';
       $('#p-area').value=''; $('#p-floors').value='1'; $('#p-notes').value='';
+      // site services
+      $('#site-power').checked=false; $('#site-water').checked=false; $('#site-heat').checked=false; $('#site-bin').checked=false; $('#site-wc').checked=false;
+      $('#site-access').value=''; $('#site-notes').value='';
+      // reset settings
       resetRates();
+      // clear jobs
       jobsBox.innerHTML='';
+      // clear summary
       renderLines([], readSettings());
       toast('Cleared.');
     });
@@ -819,6 +831,11 @@
         name:$('#p-name').value, gc:$('#p-gc').value, loc:$('#p-loc').value,
         area:$('#p-area').value, floors:$('#p-floors').value, notes:$('#p-notes').value
       };
+      const site = {
+        power: $('#site-power').checked, water: $('#site-water').checked, heat: $('#site-heat').checked,
+        bin: $('#site-bin').checked, wc: $('#site-wc').checked,
+        access: $('#site-access').value, notes: $('#site-notes').value
+      };
       const jobs = [];
       $$('.job-card', jobsBox).forEach(card=>{
         const t = card.dataset.type;
@@ -826,7 +843,7 @@
           case 'drywall':
             jobs.push({t,
               name:$('.dw-name', card).value, area:$('.dw-area', card).value,
-              ft:$('.dw-ft', card).value, inch:$('.dw-in', card).value,
+              ft:$('.dw-ft', card)?.value, inch:$('.dw-in', card)?.value,
               notes:$('.dw-notes', card).value
             }); break;
           case 'framing':
@@ -847,12 +864,12 @@
             jobs.push({t, name:$('.cu-name', card).value, amount:$('.cu-amount', card).value, notes:$('.cu-notes', card).value}); break;
         }
       });
-      return {project, settings, jobs};
+      return {project, site, settings, jobs};
     }
 
     function loadFromData(payload){
       if (!payload) return;
-      const {project, settings, jobs} = payload;
+      const {project, settings, jobs, site} = payload;
       if (project){
         $('#p-name').value = project.name||'';
         $('#p-gc').value   = project.gc||'';
@@ -860,6 +877,15 @@
         $('#p-area').value = project.area||'';
         $('#p-floors').value = project.floors||'1';
         $('#p-notes').value = project.notes||'';
+      }
+      if (site){
+        $('#site-power').checked = !!site.power;
+        $('#site-water').checked = !!site.water;
+        $('#site-heat').checked  = !!site.heat;
+        $('#site-bin').checked   = !!site.bin;
+        $('#site-wc').checked    = !!site.wc;
+        $('#site-access').value  = site.access||'';
+        $('#site-notes').value   = site.notes||'';
       }
       if (settings){
         $('#rate-dw').value = settings.rate?.dw ?? 2.5;
@@ -879,40 +905,32 @@
       calculate();
     }
 
-    // ====== Load from URL ?data=... if present ======
+    // Load from URL ?data=...
     (function(){
       const usp = new URLSearchParams(location.search);
       const b64 = usp.get('data');
       if (!b64) return;
       try{
         const json = decodeURIComponent(escape(atob(b64.replace(/-/g,'+').replace(/_/g,'/'))));
-        loadFromData(JSON.parse(json));
+        const data = JSON.parse(json);
+        loadFromData(data);
         toast('Loaded from shared link.');
       }catch(e){ console.warn('Failed to parse shared data', e); }
     })();
 
-    // ====== Toast ======
+    // Toast
     let toastTimer;
     function toast(msg){
       const t = $('#toast');
       t.textContent = msg;
-      t.classList.add('show');
+      t.classList.remove('hidden');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+      toastTimer = setTimeout(()=> t.classList.add('hidden'), 2200);
     }
 
     // Expose for debugging
     window.__Rough = { addJob, calculate, serializeAll };
   })();
-  </script>
-
-  <!-- PWA: register Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
-      });
-    }
   </script>
 </body>
 </html>
